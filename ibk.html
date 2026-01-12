@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IBK Hotel | Luxury Redefined</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Montserrat:wght@200;300;400;500&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- GSAP & ScrollTrigger -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'ibk-gold': '#D4AF37',
+                        'ibk-dark': '#0f172a',
+                        'ibk-cream': '#F5F5F0',
+                        'ibk-charcoal': '#1a1a1a'
+                    },
+                    fontFamily: {
+                        serif: ['"Cormorant Garamond"', 'serif'],
+                        sans: ['"Montserrat"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #0f172a;
+            color: #F5F5F0;
+            overflow-x: hidden;
+            opacity: 0; /* Hidden initially for preloader */
+        }
+        
+        /* Custom Cursor */
+        .c-cursor {
+            pointer-events: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 20px;
+            height: 20px;
+            border: 1px solid #D4AF37;
+            border-radius: 50%;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s cubic-bezier(0.19, 1, 0.22, 1), height 0.3s cubic-bezier(0.19, 1, 0.22, 1), background-color 0.3s;
+            mix-blend-mode: difference;
+        }
+
+        .c-cursor.hovered {
+            width: 60px;
+            height: 60px;
+            background-color: rgba(212, 175, 55, 0.1);
+            border-color: #D4AF37;
+            backdrop-filter: blur(2px);
+        }
+        
+        .c-cursor.magnetic {
+            width: 80px;
+            height: 80px;
+            background-color: #D4AF37;
+            border-color: transparent;
+            mix-blend-mode: normal;
+            opacity: 0.5;
+        }
+
+        /* Smooth Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #D4AF37;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 1px;
+            bottom: -4px;
+            left: 0;
+            background-color: #D4AF37;
+            transition: width 0.4s cubic-bezier(0.77, 0, 0.175, 1);
+        }
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        /* Curtain Reveal Class */
+        .reveal-curtain-container {
+            position: relative;
+            overflow: hidden;
+        }
+        .reveal-curtain {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #D4AF37; /* Gold curtain */
+            z-index: 20;
+            transform-origin: left;
+        }
+
+        .loader-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: #0b1120;
+            z-index: 10000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        
+        /* Image Hover Zoom Container */
+        .img-zoom-container {
+            overflow: hidden;
+        }
+        .img-zoom-container img {
+            transition: transform 1.5s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+        .img-zoom-container:hover img {
+            transform: scale(1.1) !important; /* GSAP override */
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-ibk-gold selection:text-ibk-dark">
+
+    <!-- Custom Cursor -->
+    <div class="c-cursor hidden md:block"></div>
+
+    <!-- Preloader -->
+    <div class="loader-overlay">
+        <div class="overflow-hidden mb-8">
+            <h1 class="loader-text font-serif text-5xl md:text-7xl text-ibk-gold tracking-widest translate-y-full italic">IBK</h1>
+        </div>
+        <div class="w-64 h-[1px] bg-gray-800 relative overflow-hidden">
+            <div class="loader-bar absolute top-0 left-0 w-full h-full bg-ibk-gold -translate-x-full"></div>
+        </div>
+        <div class="mt-4 overflow-hidden">
+             <p class="loader-sub text-gray-500 text-xs tracking-[0.3em] uppercase translate-y-full">Usi Ekiti • Nigeria</p>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-50 px-6 py-6 md:px-12 flex justify-between items-center mix-blend-difference text-white transition-all duration-500" id="navbar">
+        <a href="#" class="font-serif text-2xl font-bold tracking-wider z-50 hover-trigger relative group">
+            IBK.
+            <span class="absolute -bottom-1 left-0 w-0 h-[1px] bg-white transition-all duration-300 group-hover:w-full"></span>
+        </a>
+        
+        <div class="hidden md:flex space-x-8 lg:space-x-12">
+            <a href="#rooms" class="nav-link font-sans text-xs lg:text-sm tracking-widest uppercase hover-trigger font-medium">Suites</a>
+            <a href="#dining" class="nav-link font-sans text-xs lg:text-sm tracking-widest uppercase hover-trigger font-medium">Dining</a>
+            <a href="#wellness" class="nav-link font-sans text-xs lg:text-sm tracking-widest uppercase hover-trigger font-medium">Wellness</a>
+            <a href="#contact" class="nav-link font-sans text-xs lg:text-sm tracking-widest uppercase hover-trigger font-medium">Contact</a>
+        </div>
+
+        <button class="md:hidden z-50 hover-trigger">
+            <i data-lucide="menu" class="w-6 h-6 text-ibk-gold"></i>
+        </button>
+
+        <a href="#book" class="hidden md:block border border-ibk-gold px-8 py-3 font-sans text-xs tracking-widest uppercase relative overflow-hidden group hover-trigger magnetic-trigger">
+            <span class="relative z-10 group-hover:text-black transition-colors duration-300">Book Stay</span>
+            <div class="absolute inset-0 bg-ibk-gold transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
+        </a>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="relative w-full h-screen flex items-center justify-center overflow-hidden">
+        <div class="absolute inset-0 z-0 overflow-hidden">
+            <!-- Ken Burns Effect Wrapper -->
+            <div class="hero-bg-wrapper w-full h-full">
+                <div class="hero-bg absolute inset-0 bg-[url('https://i.imgur.com/UYxMd50.jpeg')] bg-cover bg-center opacity-80 scale-110"></div>
+            </div>
+            <div class="absolute inset-0 bg-gradient-to-b from-black/60 via-black/20 to-ibk-dark"></div>
+        </div>
+
+        <div class="relative z-10 text-center px-4 max-w-6xl mix-blend-screen">
+            <div class="overflow-hidden mb-4">
+                <div class="hero-subtitle-wrapper flex justify-center items-center gap-4">
+                    <span class="w-8 h-[1px] bg-ibk-gold inline-block"></span>
+                    <p class="hero-subtitle font-sans text-ibk-gold text-xs md:text-sm tracking-[0.4em] uppercase translate-y-full">Welcome to Paradise</p>
+                    <span class="w-8 h-[1px] bg-ibk-gold inline-block"></span>
+                </div>
+            </div>
+            <div class="overflow-hidden mb-8">
+                <h1 class="hero-title font-serif text-6xl md:text-8xl lg:text-9xl text-white leading-none translate-y-full tracking-tight">
+                    IBK HOTEL
+                </h1>
+            </div>
+            <div class="overflow-hidden flex justify-center">
+                <p class="hero-desc font-sans text-gray-200 text-sm md:text-lg max-w-lg leading-relaxed translate-y-full drop-shadow-2xl">
+                    Experience the pinnacle of luxury and tranquility in Ekiti. Where modern aesthetics meet timeless elegance.
+                </p>
+            </div>
+            
+            <div class="mt-16 overflow-hidden flex justify-center opacity-0 hero-btn-container">
+                <div class="flex flex-col items-center gap-2">
+                    <span class="text-[10px] uppercase tracking-widest text-white/50">Scroll</span>
+                    <div class="w-[1px] h-24 bg-white/10 relative overflow-hidden">
+                        <div class="scroll-line absolute top-0 left-0 w-full h-full bg-ibk-gold"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Intro Section -->
+    <section class="py-24 md:py-32 px-6 md:px-12 bg-ibk-dark relative overflow-hidden">
+        <div class="max-w-7xl mx-auto grid md:grid-cols-2 gap-20 items-center">
+            <div class="order-2 md:order-1 relative pl-8">
+                <!-- Image with Curtain Reveal -->
+                <div class="reveal-curtain-container aspect-[3/4]">
+                    <div class="reveal-curtain"></div>
+                    <div class="intro-img-wrapper w-full h-full overflow-hidden">
+                         <img src="https://images.unsplash.com/photo-1565538810643-b5bdb714032a?ixlib=rb-4.0.3&auto=format&fit=crop&w=1587&q=80" alt="Hotel Interior" class="w-full h-full object-cover scale-125 intro-img">
+                    </div>
+                </div>
+                
+                <!-- Floating decorative element with rotation -->
+                <div class="absolute -bottom-12 -left-4 md:-left-12 w-48 h-48 bg-[#151e32] border border-ibk-gold/30 flex items-center justify-center rounded-full parallax-circle z-20">
+                    <div class="relative w-full h-full flex items-center justify-center animate-spin-slow">
+                         <!-- Text on a curve simulated simply here -->
+                         <span class="font-serif text-ibk-gold italic text-2xl relative z-10">Est. 2024</span>
+                         <div class="absolute inset-2 border border-dashed border-ibk-gold/20 rounded-full"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="order-1 md:order-2">
+                <div class="overflow-hidden mb-6">
+                     <span class="font-sans text-ibk-gold text-xs tracking-widest uppercase block reveal-text">Our Philosophy</span>
+                </div>
+                <h2 class="font-serif text-4xl md:text-6xl lg:text-7xl text-white mb-8 leading-[1.1]">
+                    <span class="block overflow-hidden"><span class="block reveal-line">A Sanctuary</span></span>
+                    <span class="block overflow-hidden"><span class="block text-gray-500 italic reveal-line" style="transition-delay: 0.1s">for the Soul</span></span>
+                </h2>
+                <div class="overflow-hidden mb-8">
+                    <p class="font-sans text-gray-400 leading-relaxed reveal-text text-sm md:text-base">
+                        Nestled in the heart of Temidire Usi Ekiti, IBK Hotel offers an escape from the ordinary. Every corner is designed with intention, blending architectural mastery with organic warmth. We believe luxury isn't just about appearance—it's about feeling.
+                    </p>
+                </div>
+                <a href="#" class="inline-flex items-center text-ibk-gold font-sans text-xs tracking-widest uppercase hover:text-white transition-colors duration-300 group hover-trigger">
+                    <span class="border-b border-ibk-gold pb-1 group-hover:border-white transition-colors">Explore Our Story</span>
+                    <i data-lucide="arrow-right" class="ml-4 w-4 h-4 transform group-hover:translate-x-2 transition-transform duration-300"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Rooms Slider Section (Horizontal Scroll Concept) -->
+    <section id="rooms" class="py-24 bg-[#0a0f1c] overflow-hidden border-t border-white/5">
+        <div class="px-6 md:px-12 mb-16 flex justify-between items-end">
+            <div>
+                <span class="font-sans text-ibk-gold text-xs tracking-widest uppercase block mb-3">Accommodations</span>
+                <h2 class="font-serif text-4xl md:text-5xl text-white">The Collection</h2>
+            </div>
+            <div class="hidden md:flex space-x-2 text-white/50 text-xs tracking-widest uppercase">
+                <span>Drag to Explore</span>
+            </div>
+        </div>
+
+        <!-- Room Cards Container -->
+        <div class="flex space-x-8 px-6 md:px-12 overflow-x-auto pb-12 snap-x no-scrollbar cursor-grab active:cursor-grabbing" id="room-slider">
+            
+            <!-- Room 1 -->
+            <div class="min-w-[85vw] md:min-w-[45vw] lg:min-w-[30vw] group cursor-pointer snap-center hover-trigger room-card relative">
+                <div class="reveal-curtain-container aspect-[4/5] mb-8">
+                     <div class="reveal-curtain bg-ibk-dark"></div>
+                     <div class="img-zoom-container w-full h-full">
+                        <img src="https://images.unsplash.com/photo-1611892440504-42a792e24d32?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80" class="w-full h-full object-cover">
+                     </div>
+                     <!-- Overlay on hover -->
+                     <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center z-20">
+                        <div class="w-16 h-16 rounded-full border border-white/50 flex items-center justify-center backdrop-blur-sm transform scale-50 group-hover:scale-100 transition-transform duration-500">
+                             <i data-lucide="arrow-up-right" class="text-white w-6 h-6"></i>
+                        </div>
+                     </div>
+                </div>
+                <div class="flex justify-between items-start border-t border-white/10 pt-6">
+                    <div>
+                        <h3 class="font-serif text-2xl text-white mb-2 group-hover:text-ibk-gold transition-colors duration-300">Presidential Suite</h3>
+                        <p class="font-sans text-gray-500 text-xs uppercase tracking-widest">120m² • Ocean View</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Room 2 -->
+            <div class="min-w-[85vw] md:min-w-[45vw] lg:min-w-[30vw] group cursor-pointer snap-center hover-trigger room-card relative">
+                <div class="reveal-curtain-container aspect-[4/5] mb-8">
+                     <div class="reveal-curtain bg-ibk-dark"></div>
+                     <div class="img-zoom-container w-full h-full">
+                        <img src="https://i.imgur.com/SNhGeFG.jpeg" class="w-full h-full object-cover">
+                     </div>
+                     <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center z-20">
+                        <div class="w-16 h-16 rounded-full border border-white/50 flex items-center justify-center backdrop-blur-sm transform scale-50 group-hover:scale-100 transition-transform duration-500">
+                             <i data-lucide="arrow-up-right" class="text-white w-6 h-6"></i>
+                        </div>
+                     </div>
+                </div>
+                <div class="flex justify-between items-start border-t border-white/10 pt-6">
+                    <div>
+                        <h3 class="font-serif text-2xl text-white mb-2 group-hover:text-ibk-gold transition-colors duration-300">Deluxe King</h3>
+                        <p class="font-sans text-gray-500 text-xs uppercase tracking-widest">45m² • City View</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Room 3 -->
+            <div class="min-w-[85vw] md:min-w-[45vw] lg:min-w-[30vw] group cursor-pointer snap-center hover-trigger room-card relative">
+                <div class="reveal-curtain-container aspect-[4/5] mb-8">
+                     <div class="reveal-curtain bg-ibk-dark"></div>
+                     <div class="img-zoom-container w-full h-full">
+                        <img src="https://images.unsplash.com/photo-1578683010236-d716f9a3f461?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80" class="w-full h-full object-cover">
+                     </div>
+                     <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center z-20">
+                        <div class="w-16 h-16 rounded-full border border-white/50 flex items-center justify-center backdrop-blur-sm transform scale-50 group-hover:scale-100 transition-transform duration-500">
+                             <i data-lucide="arrow-up-right" class="text-white w-6 h-6"></i>
+                        </div>
+                     </div>
+                </div>
+                <div class="flex justify-between items-start border-t border-white/10 pt-6">
+                    <div>
+                        <h3 class="font-serif text-2xl text-white mb-2 group-hover:text-ibk-gold transition-colors duration-300">Garden Villa</h3>
+                        <p class="font-sans text-gray-500 text-xs uppercase tracking-widest">85m² • Private Pool</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Room 4 -->
+             <div class="min-w-[85vw] md:min-w-[45vw] lg:min-w-[30vw] group cursor-pointer snap-center hover-trigger room-card relative">
+                <div class="reveal-curtain-container aspect-[4/5] mb-8">
+                     <div class="reveal-curtain bg-ibk-dark"></div>
+                     <div class="img-zoom-container w-full h-full">
+                        <img src="https://i.imgur.com/GPRWSIV.jpeg" class="w-full h-full object-cover">
+                     </div>
+                     <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center z-20">
+                        <div class="w-16 h-16 rounded-full border border-white/50 flex items-center justify-center backdrop-blur-sm transform scale-50 group-hover:scale-100 transition-transform duration-500">
+                             <i data-lucide="arrow-up-right" class="text-white w-6 h-6"></i>
+                        </div>
+                     </div>
+                </div>
+                <div class="flex justify-between items-start border-t border-white/10 pt-6">
+                    <div>
+                        <h3 class="font-serif text-2xl text-white mb-2 group-hover:text-ibk-gold transition-colors duration-300">Skyline Loft</h3>
+                        <p class="font-sans text-gray-500 text-xs uppercase tracking-widest">60m² • Lounge</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Marquee Text -->
+    <div class="py-16 bg-ibk-gold overflow-hidden border-y border-black">
+        <div class="flex whitespace-nowrap marquee-container">
+            <span class="text-5xl md:text-8xl font-serif text-ibk-dark mx-12 uppercase italic opacity-80">Luxury • Comfort • Serenity • IBK Hotel •</span>
+            <span class="text-5xl md:text-8xl font-serif text-ibk-dark mx-12 uppercase italic opacity-80">Luxury • Comfort • Serenity • IBK Hotel •</span>
+        </div>
+    </div>
+
+    <!-- Booking / Footer Section -->
+    <footer class="bg-ibk-dark pt-32 pb-12 px-6 md:px-12 border-t border-gray-800 relative z-10" id="contact">
+        <div class="max-w-7xl mx-auto grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-20">
+            
+            <div class="col-span-1 lg:col-span-1">
+                <a href="#" class="font-serif text-4xl font-bold text-white mb-8 block">IBK.</a>
+                <p class="font-sans text-gray-400 text-sm mb-8 leading-relaxed">
+                    Redefining luxury hospitality, one stay at a time. Experience the difference.
+                </p>
+                <div class="flex space-x-6">
+                    <a href="#" class="text-white hover:text-ibk-gold transition-colors hover-trigger transform hover:scale-110 duration-300"><i data-lucide="instagram" class="w-5 h-5"></i></a>
+                    <a href="#" class="text-white hover:text-ibk-gold transition-colors hover-trigger transform hover:scale-110 duration-300"><i data-lucide="facebook" class="w-5 h-5"></i></a>
+                    <a href="#" class="text-white hover:text-ibk-gold transition-colors hover-trigger transform hover:scale-110 duration-300"><i data-lucide="twitter" class="w-5 h-5"></i></a>
+                </div>
+            </div>
+
+            <div>
+                <h4 class="font-serif text-xl text-white mb-8">Explore</h4>
+                <ul class="space-y-4 font-sans text-xs uppercase tracking-widest text-gray-400">
+                    <li><a href="#" class="hover:text-ibk-gold transition-colors hover-trigger flex items-center group"><span class="w-0 group-hover:w-2 h-[1px] bg-ibk-gold mr-0 group-hover:mr-2 transition-all duration-300"></span>Our Story</a></li>
+                    <li><a href="#" class="hover:text-ibk-gold transition-colors hover-trigger flex items-center group"><span class="w-0 group-hover:w-2 h-[1px] bg-ibk-gold mr-0 group-hover:mr-2 transition-all duration-300"></span>Rooms & Suites</a></li>
+                    <li><a href="#" class="hover:text-ibk-gold transition-colors hover-trigger flex items-center group"><span class="w-0 group-hover:w-2 h-[1px] bg-ibk-gold mr-0 group-hover:mr-2 transition-all duration-300"></span>Dining</a></li>
+                    <li><a href="#" class="hover:text-ibk-gold transition-colors hover-trigger flex items-center group"><span class="w-0 group-hover:w-2 h-[1px] bg-ibk-gold mr-0 group-hover:mr-2 transition-all duration-300"></span>Wellness</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="font-serif text-xl text-white mb-8">Contact</h4>
+                <ul class="space-y-4 font-sans text-sm text-gray-400">
+                    <li class="flex items-start">
+                        <i data-lucide="map-pin" class="w-4 h-4 mr-3 mt-1 text-ibk-gold"></i>
+                        <span>No 1 Ibukun Oluwa Street,<br>Temidire Usi Ekiti 371101, Ekiti</span>
+                    </li>
+                    <li class="flex items-center">
+                         <i data-lucide="map" class="w-4 h-4 mr-3 text-ibk-gold"></i>
+                        <span>V5JF+F3 Temidire Usi Ekiti</span>
+                    </li>
+                    <li class="flex items-center">
+                        <i data-lucide="phone" class="w-4 h-4 mr-3 text-ibk-gold"></i>
+                        <span>07046912645</span>
+                    </li>
+                    <li class="flex items-center">
+                        <i data-lucide="mail" class="w-4 h-4 mr-3 text-ibk-gold"></i>
+                        <span>reservations@ibkhotel.com</span>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="col-span-1 lg:col-span-1">
+                <h4 class="font-serif text-xl text-white mb-8">Newsletter</h4>
+                <form class="flex border-b border-gray-700 pb-4 relative">
+                    <input type="email" placeholder="Email Address" class="bg-transparent text-white w-full outline-none font-sans text-sm placeholder-gray-600">
+                    <button type="submit" class="text-ibk-gold uppercase text-xs tracking-widest hover:text-white transition-colors hover-trigger absolute right-0 bottom-4">Join</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center font-sans text-[10px] text-gray-600 uppercase tracking-widest">
+            <p>&copy; 2024 IBK Hotel. All Rights Reserved.</p>
+            <div class="flex space-x-8 mt-4 md:mt-0">
+                <a href="#" class="hover:text-white transition-colors">Privacy</a>
+                <a href="#" class="hover:text-white transition-colors">Terms</a>
+                <a href="#" class="hover:text-white transition-colors">Sitemap</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // Register ScrollTrigger
+        gsap.registerPlugin(ScrollTrigger);
+
+        // --- Custom Cursor Logic ---
+        const cursor = document.querySelector('.c-cursor');
+        const hoverTriggers = document.querySelectorAll('.hover-trigger');
+        const magneticTriggers = document.querySelectorAll('.magnetic-trigger');
+
+        document.addEventListener('mousemove', (e) => {
+            gsap.to(cursor, {
+                x: e.clientX,
+                y: e.clientY,
+                duration: 0.1,
+                ease: "power2.out"
+            });
+        });
+
+        hoverTriggers.forEach(trigger => {
+            trigger.addEventListener('mouseenter', () => cursor.classList.add('hovered'));
+            trigger.addEventListener('mouseleave', () => cursor.classList.remove('hovered'));
+        });
+        
+        // Magnetic effect for specific buttons
+        magneticTriggers.forEach(trigger => {
+            trigger.addEventListener('mouseenter', () => {
+                cursor.classList.add('magnetic');
+                gsap.to(trigger, { scale: 1.05, duration: 0.3 });
+            });
+            trigger.addEventListener('mouseleave', () => {
+                cursor.classList.remove('magnetic');
+                 gsap.to(trigger, { scale: 1, duration: 0.3, x: 0, y: 0 });
+            });
+            trigger.addEventListener('mousemove', (e) => {
+                const rect = trigger.getBoundingClientRect();
+                const x = e.clientX - rect.left - rect.width / 2;
+                const y = e.clientY - rect.top - rect.height / 2;
+                // Move button slightly towards cursor
+                gsap.to(trigger, { x: x * 0.2, y: y * 0.2, duration: 0.3 });
+            });
+        });
+
+        // --- Loading Sequence ---
+        const tlLoader = gsap.timeline();
+
+        // Make body visible immediately but cover with loader
+        gsap.set("body", { opacity: 1 });
+
+        tlLoader.to(".loader-bar", {
+            x: "0%",
+            duration: 1.5,
+            ease: "power2.inOut"
+        })
+        .to(".loader-text", {
+            y: 0,
+            duration: 1,
+            ease: "power3.out"
+        }, "-=1")
+        .to(".loader-sub", {
+            y: 0,
+            duration: 1,
+            ease: "power3.out"
+        }, "-=0.8")
+        .to(".loader-overlay", {
+            y: "-100%",
+            duration: 1.5,
+            ease: "power4.inOut",
+            delay: 0.2
+        })
+        .from(".hero-bg", {
+            scale: 1.4,
+            duration: 2.5,
+            ease: "power2.out"
+        }, "-=1.2")
+        .to(".hero-subtitle", {
+            y: 0,
+            duration: 1,
+            ease: "power3.out"
+        }, "-=0.8")
+        .to(".hero-title", {
+            y: 0,
+            duration: 1.2,
+            ease: "power3.out"
+        }, "-=0.9")
+        .to(".hero-desc", {
+            y: 0,
+            duration: 1,
+            ease: "power3.out"
+        }, "-=1")
+        .to(".hero-btn-container", {
+            opacity: 1,
+            duration: 1
+        }, "-=0.8");
+
+        // --- Persistent Ken Burns Effect (Hero) ---
+        gsap.to(".hero-bg", {
+            scale: 1.15,
+            duration: 20,
+            repeat: -1,
+            yoyo: true,
+            ease: "sine.inOut"
+        });
+
+        // --- Scroll Line Animation in Hero ---
+        gsap.to(".scroll-line", {
+            y: "100%",
+            duration: 2,
+            ease: "power1.inOut",
+            repeat: -1
+        });
+
+        // --- Navbar Scroll Effect ---
+        const navbar = document.getElementById("navbar");
+        window.addEventListener("scroll", () => {
+            if (window.scrollY > 50) {
+                navbar.classList.add("bg-ibk-dark/80", "backdrop-blur-md", "shadow-sm", "py-4");
+                navbar.classList.remove("py-6");
+            } else {
+                navbar.classList.remove("bg-ibk-dark/80", "backdrop-blur-md", "shadow-sm", "py-4");
+                navbar.classList.add("py-6");
+            }
+        });
+
+        // --- Split Line / Text Reveals ---
+        const revealElements = document.querySelectorAll(".reveal-text");
+        revealElements.forEach(element => {
+            gsap.fromTo(element, 
+                { y: 30, opacity: 0 },
+                {
+                    y: 0,
+                    opacity: 1,
+                    duration: 1,
+                    ease: "power3.out",
+                    scrollTrigger: {
+                        trigger: element,
+                        start: "top 90%",
+                        viewport: { once: true }
+                    }
+                }
+            );
+        });
+
+        const revealLines = document.querySelectorAll(".reveal-line");
+        revealLines.forEach(element => {
+            gsap.fromTo(element, 
+                { y: "100%" },
+                {
+                    y: "0%",
+                    duration: 1.2,
+                    ease: "power3.out",
+                    scrollTrigger: {
+                        trigger: element,
+                        start: "top 85%",
+                        viewport: { once: true }
+                    }
+                }
+            );
+        });
+
+        // --- Architectural Curtain Image Reveals ---
+        const curtainContainers = document.querySelectorAll(".reveal-curtain-container");
+        curtainContainers.forEach(container => {
+            const curtain = container.querySelector(".reveal-curtain");
+            const img = container.querySelector("img");
+            
+            const tl = gsap.timeline({
+                scrollTrigger: {
+                    trigger: container,
+                    start: "top 75%",
+                }
+            });
+
+            tl.to(curtain, {
+                scaleX: 0,
+                transformOrigin: "right", // Peel away to right
+                duration: 1.2,
+                ease: "power3.inOut"
+            })
+            .from(img, {
+                scale: 1.3,
+                duration: 1.5,
+                ease: "power2.out"
+            }, "-=1.2");
+        });
+        
+        // --- Floating Circle Parallax ---
+        gsap.to(".parallax-circle", {
+            y: -80,
+            rotation: 45,
+            scrollTrigger: {
+                trigger: ".intro-img-wrapper",
+                start: "top bottom",
+                end: "bottom top",
+                scrub: 1.5
+            }
+        });
+
+        // --- Room Cards Horizontal Parallax ---
+        gsap.from(".room-card", {
+            x: 100,
+            opacity: 0,
+            duration: 1,
+            stagger: 0.1,
+            ease: "power3.out",
+            scrollTrigger: {
+                trigger: "#rooms",
+                start: "top 70%"
+            }
+        });
+
+        // --- Amenities Stagger ---
+        gsap.from(".amenity-card", {
+            y: 40,
+            opacity: 0,
+            duration: 0.8,
+            stagger: 0.1,
+            scrollTrigger: {
+                trigger: "#wellness",
+                start: "top 80%"
+            }
+        });
+
+        // --- Marquee Animation ---
+        gsap.to(".marquee-container", {
+            xPercent: -50,
+            ease: "none",
+            duration: 30,
+            repeat: -1
+        });
+
+        // --- Spin Animation for EST Circle ---
+        gsap.to(".animate-spin-slow", {
+            rotation: 360,
+            duration: 20,
+            repeat: -1,
+            ease: "none"
+        });
+
+    </script>
+</body>
+</html>
